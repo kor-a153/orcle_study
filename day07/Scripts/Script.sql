@@ -1,0 +1,402 @@
+
+
+-- 사전지식 1
+-- 알리아스를 붙이면 알리아스로만 접근 할 수 있다.
+SELECT PR.PRODUCT_NAME 
+FROM TBL_PRODUCT PR;
+
+-- 산술연산자
+SELECT 5+ 3 FROM DUAL;
+
+-- 부호(SIGN) 1,-1
+SELECT SIGN(100) 
+FROM DUAL;
+SELECT SIGN(-100) 
+FROM DUAL;
+
+-- 논리연산자
+-- != , <>
+SELECT * FROM TBL_PRODUCT
+WHERE  PRODUCT_PRICE <> 25300;
+
+-- 가격대 10만~ 20만
+-- BETWEEN: 범위 지정
+SELECT *
+FROM TBL_PRODUCT
+WHERE PRODUCT_PRICE >= 100000 AND PRODUCT_PRICE <= 200000;
+
+SELECT *
+FROM TBL_PRODUCT
+WHERE PRODUCT_PRICE BETWEEN 100000 AND 200000;
+
+-- 문자열 연산자
+-- CONCAT(): 문자열 연결
+SELECT CONCAT('HELLO,', 'WORLD') FROM DUAL;
+
+-- SUBSTR(): 문자열 추출
+SELECT SUBSTR('HELLO WORLD', 8 , 5) FROM DUAL;
+-- 오라클은 인덱스가 1부터 시작함.
+
+-- 중복 연산자
+CREATE SEQUENCE SEQ_TEST;
+CREATE TABLE TBL_TEST(
+	ID NUMBER CONSTRAINT PK_TEST PRIMARY KEY,
+	TEST_NAME VARCHAR2 (255),
+	TEST_PRICE NUMBER
+);
+
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '지우개',20000);
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '지우개',20000);
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '지우개',20000);
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '지우개',30000);
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '지우개',15000);
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '모니터',20000);
+INSERT INTO TBL_TEST
+VALUES(SEQ_TEST.NEXTVAL, '키보드',30000);
+
+CREATE SEQUENCE SEQ_TEST_ORDER;
+CREATE TABLE TBL_TEST_ORDER(
+	ID NUMBER CONSTRAINT PK_TEST_ORDER PRIMARY KEY,
+	TEST_ORDER_NAME VARCHAR2(255),
+	TEST_ID NUMBER
+	CONSTRAINT FK_TEST_ORDER_TEST FOREIGN KEY(TEST_ID)
+	REFERENCES TBL_TEST(ID)
+);
+
+INSERT INTO TBL_TEST_ORDER
+VALUES(SEQ_TEST.NEXTVAL, '문 앞',1);
+INSERT INTO TBL_TEST_ORDER
+VALUES(SEQ_TEST.NEXTVAL, '직접 수령',2);
+INSERT INTO TBL_TEST_ORDER
+VALUES(SEQ_TEST.NEXTVAL, '직접 수령',2);
+
+-- 중복 제거 UNION 
+SELECT TEST_NAME FROM TBL_TEST
+UNION 
+SELECT TEST_ORDER_NAME FROM TBL_TEST_ORDER;
+
+-- 중복을 제거하지 않음. UNION ALL
+SELECT * FROM TBL_TEST
+UNION ALL
+SELECT TEST_ORDER_NAME FROM TBL_TEST_ORDER;
+
+SELECT * FROM TBL_TEST
+MINUS
+SELECT TEST_ORDER_NAME FROM TBL_TEST_ORDER;
+
+-- 문자열 함수
+SELECT UPPER 'abcdEFGH' FROM DUAL;
+SELECT LOWER 'abcdEFGH' FROM DUAL;
+SELECT TRIM ('         abcd         EFGH') FROM DUAL;
+SELECT REPLACE ('APPLE' , 'P', 'E') FROM DUAL;
+SELECT INSTR ('APPLE','L') FROM DUAL;
+
+-- 날짜 및 시간 함수
+--SYSDATE   
+--   - 현재 날짜와 시간을 반환   
+SELECT SYSDATE FROM DUAL;
+--CURRENT_DATE   
+--   - 현재 날짜 (시간 제외)   
+SELECT CURRENT_DATE FROM DUAL;
+--ADD_MONTHS()   
+--   - 날짜에 월을 더하거나 빼기   
+SELECT ADD_MONTHS(SYSDATE, 2) FROM DUAL;
+--MONTHS_BETWEEN()   
+-- 두 날짜 간의 차이를 월 단위로 반환   
+-- 달 차이
+-- MONTHS_BETWEEN()
+SELECT MONTHS_BETWEEN(SYSDATE, ADD_MONTHS(SYSDATE, 2)) FROM DUAL;
+SELECT MONTHS_BETWEEN(SYSDATE, '2024-07-12') FROM DUAL;
+
+-- 일 차이
+SELECT (SYSDATE - TO_DATE('2025-09-15 11:15:00', 'YYYY-MM-DD HH24:MI:SS')) FROM DUAL;
+-- 시 차이
+SELECT (SYSDATE - TO_DATE('2025-09-18 11:15:00', 'YYYY-MM-DD HH24:MI:SS')) * 24 FROM DUAL;
+-- 분 차이
+SELECT (SYSDATE - TO_DATE('2025-09-18 11:15:00', 'YYYY-MM-DD HH24:MI:SS')) * 24 * 60 FROM DUAL;
+-- 초 차이
+SELECT (SYSDATE - TO_DATE('2025-09-18 11:15:00', 'YYYY-MM-DD HH24:MI:SS')) * 24 * 60 * 60 FROM DUAL;
+
+
+--NEXT_DAY()   
+--   - 특정 날짜 이후의 지정된 요일을 반환   
+
+--1: 일
+--2: 월
+--3: 화 ...
+SELECT NEXT_DAY(SYSDATE, 1) FROM DUAL;
+
+
+--TRUNC()   
+--   - 날짜의 시각을 제거하고 날짜만 반환   
+SELECT TRUNC(SYSDATE) FROM DUAL;
+--EXTRACT()   
+--   - 날짜나 시간의 일부를 반환   
+SELECT EXTRACT(DAY FROM NEXT_DAY(SYSDATE,7)) FROM DUAL;
+SELECT EXTRACT(YEAR FROM NEXT_DAY(SYSDATE,7)) FROM DUAL;
+--MONTH, DAY,
+   
+-- 시, 분, 초를 추출
+-- TO_CHAR() :  문자열로 형변환
+SELECT TO_CHAR(TO_DATE('2026-01-01 17:15:10','YYYY-MM-DD HH24:MI:SS'),'HH') FROM DUAL;
+SELECT TO_CHAR(TO_DATE('2026-01-01 17:15:10','YYYY-MM-DD HH24:MI:SS'),'MI') FROM DUAL;
+SELECT TO_CHAR(TO_DATE('2026-01-01 17:15:10','YYYY-MM-DD HH24:MI:SS'),'SS') FROM DUAL;
+
+
+--ABS()   
+--   - 절댓값을 반환   
+SELECT ABS(-100) FROM DUAL;
+--CEIL()   
+--   - 주어진 숫자보다 크거나 같은 최소 정수 반환   
+SELECT CEIL(3.14) FROM DUAL;
+--FLOOR()   
+--   - 주어진 숫자보다 작거나 같은 최대 정수 반환   
+SELECT FLOOR(3.14) FROM DUAL;
+--MOD()   
+--   - 나머지를 반환   
+SELECT MOD(5, 2) FROM DUAL;
+--ROUND()   
+--   - 숫자를 반올림하여 반환   
+SELECT ROUND(123.456, 2) FROM DUAL;
+--POWER()   
+--   - 거듭제곱을 반환   
+SELECT POWER(2, 3) FROM DUAL;
+
+
+-- 변환 함수
+--TO_NUMBER()   
+--   - 문자열을 숫자로 변환   
+SELECT  '100.100' + 10 FROM DUAL;
+SELECT  '100.100' - 10 FROM DUAL;
+--SELECT  'ㄱ' + 10 FROM DUAL; -- 아스키코드가 적용되지 않음.
+SELECT TO_NUMBER('100.100') + 10 FROM DUAL;
+--TO_TIMESTAMP()
+--   - TIMESTAMP 타입으로 형변환
+SELECT TO_TIMESTAMP('2025-02-25 16:40:30', 'YYYY-MM-DD HH24:MI:SS') DUAL;
+--TO_CHAR()   
+--   - 숫자나 날짜를 문자열로 변환   SELECT 
+SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD') FROM DUAL;
+--TO_DATE()   
+--   - 문자열을 날짜로 변환   
+SELECT TO_DATE('2024-02-23', 'YYYY-MM-DD') FROM DUAL;
+
+--CAST()   
+--   - 값을 다른 데이터 타입으로 변환   
+SELECT CAST(10 AS VARCHAR2(255)) FROM DUAL;
+SELECT CAST('10.5' AS NUMBER) FROM DUAL;
+SELECT CAST('2025-02-27' AS DATE) FROM DUAL;
+SELECT CAST('2025-02-27' AS TIMESTAMP) FROM DUAL;
+
+-- NULL 치환
+SELECT *
+FROM TBL_TEST TBT
+LEFT JOIN TBL_TEST_ORDER TBO 
+ON TBT.ID = TBO.TEST_ID;
+
+-- NVL : 초기값
+SELECT TBT.*, TBO.* ,NVL(TEST_ORDER_NAME, '없음')
+FROM TBL_TEST TBT
+LEFT JOIN TBL_TEST_ORDER TBO 
+ON TBT.ID = TBO.TEST_ID;
+
+--NVL2: 삼항연산자랑 같음.
+SELECT TBT.*, TBO.* ,NVL2(TEST_ORDER_NAME, '있음', '')
+FROM TBL_TEST TBT
+LEFT JOIN TBL_TEST_ORDER TBO 
+ON TBT.ID = TBO.TEST_ID;
+
+--COALESCE()
+SELECT TBT.*, TBO.* ,COALESCE(TEST_ORDER_NAME, TO_CHAR(TBO.TEST_ID),TBT_TESTNAME)
+FROM TBL_TEST TBT
+LEFT JOIN TBL_TEST_ORDER TBO 
+ON TBT.ID = TBO.TEST_ID;
+
+-- NULLIF() :
+-- 두 값이 같으면 NULL 
+-- NUMBER만 받을 수 있음.
+SELECT TBT.*, TBO.* ,NULLIF(TBT.TEST_PRICE, TBO.ID)
+FROM TBL_TEST TBT
+LEFT JOIN TBL_TEST_ORDER TBO 
+ON TBT.ID = TBO.TEST_ID;
+
+--NVL()   
+--   - 첫 번째 값이 NULL이면 두 번째 값을 반환   
+SELECT NVL(SALARY, 0) FROM EMP;
+--NVL2()   
+--   - 첫 번째 값이 NULL이면 세 번째 값을 반환   
+SELECT NVL2(SALARY, 'Has Salary', 'No Salary') FROM EMP;
+--COALESCE()   
+--   - NULL이 아닌 첫 번째 값을 반환   
+SELECT COALESCE(SALARY, BONUS, 0) FROM EMP;
+--NULLIF()   
+--   - 두 값이 같으면 NULL 반환, 다르면 첫 번째 값 반환   
+SELECT NULLIF(SALARY, 0) FROM EMP;
+--IS NULL   OR IS NOT NULL
+--   - 값이 NULL인지 확인   
+SELECT * FROM EMP WHERE COMM IS NULL;
+
+
+--CASE문
+   SELECT CASE PRODUCT_NAME
+              WHEN '모니터' THEN '모니'
+              WHEN '마우스' THEN '쥐'
+              ELSE '다른거'
+          END AS PRODUCT_NAME
+   FROM TBL_PRODUCT;
+      
+--*WHEN과 THEN절에 처리가 되지 않은 값은 모두 NULL
+  
+  SELECT 
+  	TBT.*,
+  	TBO.*,
+  	CASE 
+  	WHEN TBO.TEST_ORDER_NAME IS NOT NULL THEN '문 앞에 배송 됐어요.'
+  	WHEN TBO.TEST_ORDER_NAME IS NULL THEN '직접 수령 했어요.'
+  	ELSE 'A'
+  	END
+FROM TBL_TEST TBT
+LEFT JOIN TBL_TEST_ORDER TBO 
+ON TBT.ID = TBO.TEST_ID;
+
+
+-- 윈도우 함수 
+--   - 데이터를 그룹화하거나 특정 순서대로 처리할 수 있게 해주는 함수
+
+
+--집계함수 OVER()절
+--   - 윈도우 함수 OVER ( [PARTITION BY 컬럼] [ORDER BY 컬럼] [ROWS BETWEEN 범위] )
+--   1) PARTITION BY
+--      - 지정된 컬럼을 기준으로 데이터를 나누고, 각 그룹 내에서 윈도우 함수가 독립적으로 계산
+SELECT 
+	ROW_NUMBER() OVER(PARTITION BY TEST_NAME ORDER BY TEST_PRICE DESC),
+	TEST_NAME,
+	TEST_PRICE
+FROM TBL_TEST;
+--   2) ORDER BY
+--      - 윈도우 함수가 적용될 데이터의 정렬 순서를 정의
+SELECT 
+--	ROW_NUMBER() OVER(PARTITION BY TEST_NAME ORDER BY TEST_PRICE DESC),
+	SUM(TEST_PRICE) OVER (PARTITION BY TEST_NAME), 
+	TEST_NAME,
+	TEST_PRICE
+FROM TBL_TEST;
+--   3) ROWS BETWEEN
+--      - 데이터의 슬라이딩 윈도우를 정의하는 데 사용되며, 윈도우의 시작점과 끝점을 지정 
+      
+      OVER(ORDER BY 컬럼 ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING)
+
+--RANK() 
+--   - 함수는 동일한 값이 있을 경우 같은 순위를 부여하고, 
+--   - 그 다음 순위는 건너뛰는 방식으로 동작합니다. 
+--   - 예를 들어, 두 명이 같은 순위를 가질 경우 다음 순위는 두 칸을 건너뛰게 됩니다.
+--   - 공동1위 -> 3위
+  SELECT 
+	RANK() OVER(ORDER BY TEST_PRICE DESC),
+	TEST_NAME,
+	TEST_PRICE
+FROM TBL_TEST;
+--DENSE_RANK() 
+--   - 함수는 동일한 값에 같은 순위를 부여하지만, 다음 순위는 건너뛰지 않고 연속적으로 증가합니다.
+--   - 공동1위 -> 2위
+  SELECT 
+	DENSE_RANK() OVER(ORDER BY TEST_PRICE DESC),
+	TEST_NAME,
+	TEST_PRICE
+FROM TBL_TEST;
+
+--ROW_NUMBER() 함수는 동일한 값에 대해서도 
+--   - 순위를 중복 없이 고유하게 부여합니다. 
+--   - 따라서 순위가 동일한 값이 있어도 중복되지 않는 고유한 값을 부여하려면 
+--   ROW_NUMBER()를 사용해야 합니다.
+  SELECT 
+	ROW_NUMBER() OVER(ORDER BY TEST_PRICE DESC),
+	TEST_NAME,
+	TEST_PRICE
+FROM TBL_TEST;
+
+
+--분석 함수
+--   - 분석 함수는 윈도우 내에서 각 행에 대해 계산된 값을 반환하며, 
+--   주로 이전 또는 이후 행의 값을 참조하거나, 윈도우의 첫 번째 또는 마지막 값을 계산할 때 사용
+--   
+--   1) LEAD(컬럼, 다음 몇 번째 행)
+--      - 현재 행을 기준으로 뒤에 있는 행의 값을 반환(다음)
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	LEAD(TEST_PRICE, 5) OVER(ORDER BY TEST_PRICE)
+FROM TBL_TEST ;
+--   2) LAG(컬럼, 이전 몇 번째 행)
+--      -  현재 행을 기준으로 앞에 있는 행의 값을 반환(이전)
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	LAG(TEST_PRICE, 5) OVER(ORDER BY TEST_PRICE)
+FROM TBL_TEST ;
+-- LEAD와 LAG는 역 관계임.
+
+--   3) FIRST_VALUE(컬럼)
+--      - 윈도우 내에서 첫 번째 값을 반환
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	FIRST_VALUE(TEST_PRICE) OVER(ORDER BY TEST_PRICE)
+FROM TBL_TEST ;
+
+--   4) LAST_VALUE(컬럼)
+--      - 윈도우 내에서 마지막 값을 반환
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	LAST_VALUE(TEST_PRICE) OVER(ORDER BY TEST_PRICE DESC)
+FROM TBL_TEST ;
+
+--   5) NTH_VALUE(컬럼, 행)
+--      - 윈도우 내에서 N번째 값을 반환
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	NTH_VALUE(TEST_PRICE, 6) OVER(ORDER BY TEST_PRICE)
+FROM TBL_TEST ;
+--   6) CUME_DIST()
+--      - 누적 비율 
+
+
+--   7) PERCENT_RANK()
+--      - 함수 비율 순위
+
+-- 그룹 집계
+--ROLLUP()
+--   - 소 그룹간의 합계를 계산하는 함수
+--      
+--CUBE()
+--   - 소 그룹간의 합계를 계산하는 함수, 모든 경우의 수를 계산한다
+--   
+--GROUPING SETS()
+--   - 그룹화 기준에 대해 집계된 결과를 한 번에 계산
+--   
+--*집계쿼리는 GROUP BY 절에서 같이 사용된다.
+--
+
+-- 롤업
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	SUM (TEST_PRICE) OVER(PARTITION BY TEST_NAME)
+FROM TBL_TEST 
+GROUP BY ROLLUP (TEST_NAME , TEST_PRICE) ;
+
+-- 큐브
+SELECT 
+	TEST_NAME,
+	TEST_PRICE,
+	SUM (TEST_PRICE) OVER(PARTITION BY TEST_NAME)
+FROM TBL_TEST 
+GROUP BY CUBE (TEST_NAME , TEST_PRICE) ;
+
